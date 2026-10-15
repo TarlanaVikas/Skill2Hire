@@ -1,0 +1,95 @@
+# ───────── Python ─────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ───────── Environment & secrets ─────────
+.env
+.env.*
+!.env.example
+*.secret
+*.secrets
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+id_rsa
+id_rsa.pub
+credentials.json
+service-account*.json
+
+# ───────── Logs & runtime ─────────
+*.log
+logs/
+*.pid
+*.out
+*.err
+
+# ───────── Tests & tooling caches ─────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+
+# ───────── Local databases ─────────
+*.sqlite
+*.sqlite3
+*.db
+test_skill2hire.db
+
+# ───────── Uploads / user generated ─────────
+uploads/
+media/
+*.pdf
+!docs/**/*.pdf
+
+# ───────── Frontend (Node / React / Vite) ─────────
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/build/
+frontend/.vite/
+frontend/*.local
+.npm/
+.eslintcache
+.parcel-cache/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage/
+
+# ───────── Hosting / deploy tooling ─────────
+.netlify/
+.vercel/
+.render/
+
+# ───────── IDE / OS ─────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*.suo
+*.sw?
+.DS_Store
+Thumbs.db
+desktop.ini

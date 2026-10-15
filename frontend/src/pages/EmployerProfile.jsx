@@ -1,0 +1,111 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+import apiClient from '../api/client';
+import Navbar from '../components/Navbar';
+import { Buildings, ArrowLeft, CheckCircle } from '@phosphor-icons/react';
+
+const EmployerProfile = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [companyDescription, setCompanyDescription] = useState('');
+
+  const fetchProfile = async () => {
+    try {
+      const res = await apiClient.get('/employer/my-profile');
+      setCompanyName(res.data.company_name || '');
+      setCompanyDescription(res.data.company_description || '');
+    } catch { /* no profile */ }
+    finally { setLoading(false); }
+  };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (user) fetchProfile();
+  }, [user]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!companyName.trim()) { setError('Company name is required.'); return; }
+    setSaving(true); setError('');
+    try {
+      await apiClient.patch('/employer/update-profile', {
+        company_name: companyName.trim(),
+        company_description: companyDescription.trim(),
+      });
+      setSuccess('Profile updated!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to save.');
+    } finally { setSaving(false); }
+  };
+
+  const inputStyle = {
+    width: '100%', padding: '14px 16px', borderRadius: '10px',
+    border: '1.5px solid rgba(6,44,48,0.1)', background: 'rgba(255,255,255,0.6)',
+    fontSize: '0.9rem', color: 'var(--s2h-ink)', outline: 'none',
+    fontFamily: 'var(--font-body)', boxSizing: 'border-box',
+  };
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--s2h-bg)', backgroundImage: 'var(--mesh-bg)', backgroundSize: '22px 22px' }}>
+      <Navbar />
+      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '120px 24px' }}>
+        <div className="glass-card" style={{ height: '350px', borderRadius: '16px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--s2h-bg)', backgroundImage: 'var(--mesh-bg)', backgroundSize: '22px 22px' }}>
+      <Navbar />
+      <div style={{ maxWidth: '560px', margin: '0 auto', padding: '100px 24px 60px' }}>
+
+        <button onClick={() => navigate('/employer')} className="font-body"
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', background: 'transparent', border: '1.5px solid rgba(6,44,48,0.1)', cursor: 'pointer', color: 'var(--s2h-ink)', fontWeight: 600, marginBottom: '24px', fontSize: '0.85rem' }}>
+          <ArrowLeft weight="duotone" size={16} /> Back to Dashboard
+        </button>
+
+        <div className="glass-card" style={{ padding: '40px', borderRadius: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(6,44,48,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Buildings size={24} color="var(--s2h-ink)" />
+            </div>
+            <div>
+              <h1 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--s2h-ink)' }}>Company Profile</h1>
+              <p className="font-body" style={{ fontSize: '0.8rem', color: '#7A8C89' }}>{user?.user_email}</p>
+            </div>
+          </div>
+
+          {error && <div className="font-body" style={{ padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', background: 'rgba(10,127,114,0.08)', border: '1px solid rgba(10,127,114,0.2)', color: '#C62828', fontSize: '0.85rem' }}>{error}</div>}
+          {success && <div className="font-body" style={{ padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', background: 'rgba(34,160,107,0.08)', border: '1px solid rgba(34,160,107,0.2)', color: '#177A52', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}><CheckCircle weight="duotone" size={16} /> {success}</div>}
+
+          <form onSubmit={handleSave}>
+            <div style={{ marginBottom: '20px' }}>
+              <label className="font-body" style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--s2h-ink)', marginBottom: '8px' }}>Company Name *</label>
+              <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="e.g. TechCorp Inc." required style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'var(--s2h-primary)'} onBlur={e => e.target.style.borderColor = 'rgba(6,44,48,0.1)'} />
+            </div>
+            <div style={{ marginBottom: '28px' }}>
+              <label className="font-body" style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--s2h-ink)', marginBottom: '8px' }}>Company Description</label>
+              <textarea value={companyDescription} onChange={e => setCompanyDescription(e.target.value)} placeholder="What does your company do?" rows={4} className="font-body"
+                style={{ ...inputStyle, resize: 'vertical' }} onFocus={e => e.target.style.borderColor = 'var(--s2h-primary)'} onBlur={e => e.target.style.borderColor = 'rgba(6,44,48,0.1)'} />
+            </div>
+            <button type="submit" disabled={saving} className="btn-primary font-body"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: saving ? 0.6 : 1 }}>
+              {saving ? 'Saving...' : <><CheckCircle weight="duotone" size={16} /> Save Changes</>}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EmployerProfile;
